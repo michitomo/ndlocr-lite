@@ -16,12 +16,20 @@ on:
   push:
     tags:
       - "models-v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. models-v2026.04.19)"
+        required: true
+        default: "models-v2026.04.19"
 
 jobs:
   release:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -48,8 +56,8 @@ jobs:
 
       - name: Create GitHub Release
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "Models ${{ github.ref_name }}" \
+          gh release create "${{ env.RELEASE_TAG }}" \
+            --title "Models ${{ env.RELEASE_TAG }}" \
             --notes "ONNX model files for ndlocr-lite-web.
 
           These files are fetched and cached by the browser app on first use.
@@ -69,14 +77,14 @@ jobs:
         run: |
           for f in src/model/*.onnx; do
             [ -f "$f" ] || { echo "WARNING: no .onnx files found in src/model/"; break; }
-            gh release upload "${{ github.ref_name }}" "$f"
+            gh release upload "${{ env.RELEASE_TAG }}" "$f"
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload manifest.json
         run: |
-          gh release upload "${{ github.ref_name }}" \
+          gh release upload "${{ env.RELEASE_TAG }}" \
             ndlocr-lite-web/public/manifest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -84,6 +92,6 @@ jobs:
       - name: Upload ndlocr_web wheel
         run: |
           whl=$(ls ndlocr-lite-web/public/wheels/ndlocr_web-*.whl | head -1)
-          gh release upload "${{ github.ref_name }}" "$whl"
+          gh release upload "${{ env.RELEASE_TAG }}" "$whl"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
