@@ -45,7 +45,10 @@ export interface OcrResult {
 // ---------------------------------------------------------------------------
 
 const PYODIDE_VERSION = "0.27.2";
-const PYODIDE_CDN = `https://cdn.jsdelivr.net/npm/pyodide@${PYODIDE_VERSION}/`;
+// Use the GitHub releases CDN (/pyodide/vX.Y.Z/full/) — the npm CDN
+// (/npm/pyodide@X.Y.Z/) ships only the JS runtime, not the wheel files,
+// so all loadPackage() calls fail with SRI errors (404 hashed as garbage).
+const PYODIDE_CDN = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 
 // ---------------------------------------------------------------------------
 // Module-level state (persists across ocr() calls)
