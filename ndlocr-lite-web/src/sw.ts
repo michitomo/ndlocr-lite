@@ -60,6 +60,10 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   if (request.cache === "only-if-cached" && request.mode !== "same-origin")
     return;
+  // Requests with an integrity attribute (e.g. Pyodide loadPackage) must not
+  // be intercepted: re-wrapping the response via new Response() causes the
+  // browser's SRI re-verification to fail against an already-consumed stream.
+  if (request.integrity) return;
 
   event.respondWith(
     (async () => {
