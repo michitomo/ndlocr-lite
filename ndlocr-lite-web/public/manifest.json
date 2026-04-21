@@ -1,6 +1,6 @@
 {
   "version": "2026.04.19",
-  "baseUrl": "https://github.com/michitomo/ndlocr-lite/releases/download/models-v2026.04.19/",
+  "baseUrl": "https://raw.githubusercontent.com/michitomo/ndlocr-lite/master/src/model/",
   "models": [
     {
       "id": "deim",
