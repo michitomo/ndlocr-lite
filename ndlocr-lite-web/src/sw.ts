@@ -40,11 +40,14 @@ self.addEventListener("activate", (event) => {
 
 // ── COOP/COEP header injection ────────────────────────────────────────────────
 // GitHub Pages cannot serve custom HTTP headers, so the service worker
-// re-wraps every response with the headers required for SharedArrayBuffer.
+// re-wraps every same-origin response with the headers required for
+// SharedArrayBuffer.  We use COEP:credentialless (rather than require-corp)
+// so that cross-origin resources such as GitHub release assets are allowed
+// without needing a Cross-Origin-Resource-Policy header on the CDN.
 function withCOI(response: Response): Response {
   if (response.status === 0) return response;
   const headers = new Headers(response.headers);
-  headers.set("Cross-Origin-Embedder-Policy", "require-corp");
+  headers.set("Cross-Origin-Embedder-Policy", "credentialless");
   headers.set("Cross-Origin-Resource-Policy", "cross-origin");
   headers.set("Cross-Origin-Opener-Policy", "same-origin");
   return new Response(response.body, {
@@ -64,6 +67,11 @@ self.addEventListener("fetch", (event) => {
   // be intercepted: re-wrapping the response via new Response() causes the
   // browser's SRI re-verification to fail against an already-consumed stream.
   if (request.integrity) return;
+  // Cross-origin requests (CDN, GitHub releases, etc.) do not need the SW to
+  // add COEP/CORP headers — COEP:credentialless only requires those on the
+  // page itself. Let the browser handle them directly to avoid CORS issues
+  // from response re-wrapping.
+  if (new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(
     (async () => {

@@ -6,7 +6,9 @@ import { VitePWA } from "vite-plugin-pwa";
 
 const COOP_COEP_HEADERS = {
   "Cross-Origin-Opener-Policy": "same-origin",
-  "Cross-Origin-Embedder-Policy": "require-corp",
+  // credentialless allows cross-origin resources (e.g. GitHub release assets)
+  // without requiring Cross-Origin-Resource-Policy on the remote server.
+  "Cross-Origin-Embedder-Policy": "credentialless",
 };
 
 // Base path: '/' for Cloudflare Pages/local, '/repo-name/' for GitHub Pages.
