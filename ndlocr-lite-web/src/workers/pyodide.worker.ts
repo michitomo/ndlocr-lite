@@ -199,9 +199,17 @@ const workerApi = {
 
     // ── Stage 3: ndlocr_web wheel ─────────────────────────────────────────
     onProgress("wheel", 0);
+    // micropip 0.8.0 (Pyodide 0.27.2) requires a fully-qualified URL.
+    // Derive it from the worker origin + Vite base path so it works both
+    // locally (base="/") and on GitHub Pages (base="/ndlocr-lite/").
+    const wheelUrl = new URL(
+      `${import.meta.env.BASE_URL}wheels/ndlocr_web-0.1.0-py3-none-any.whl`,
+      self.location.origin,
+    ).href;
+    pyodide.globals.set("_wheel_url", wheelUrl);
     await pyodide.runPythonAsync(`
 import micropip
-await micropip.install("/wheels/ndlocr_web-0.1.0-py3-none-any.whl")
+await micropip.install(_wheel_url)
 `);
     onProgress("wheel", 100);
 
