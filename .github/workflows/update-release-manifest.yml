@@ -1,0 +1,28 @@
+name: update-release-manifest
+
+# Re-uploads manifest.json to an existing GitHub Release.
+# Use this after changing manifest.json in the repo to sync the release asset.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to update (e.g. models-v2026.04.19)"
+        required: true
+        default: "models-v2026.04.19"
+
+jobs:
+  update:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Re-upload manifest.json to release
+        run: |
+          gh release upload "${{ inputs.tag }}" \
+            ndlocr-lite-web/public/manifest.json \
+            --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
