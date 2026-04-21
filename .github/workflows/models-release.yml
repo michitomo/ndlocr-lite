@@ -38,7 +38,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install build tools
-        run: pip install build
+        run: pip install build wheel
 
       - name: Build ndlocr_web wheel
         run: bash scripts/build-wheel.sh
